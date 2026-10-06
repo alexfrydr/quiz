@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Квиз по веб-программированию</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+        <header class="header">
+            <h1>Квиз по веб-программированию</h1>
+            <p class="subtitle">Клиент + сервер · 5 случайных вопросов</p>
+        </header>
+
+        <main>
+            <!-- Start screen -->
+            <section id="screen-start" class="screen active">
+                <div class="card">
+                    <h2>Проверка знаний</h2>
+                    <p>Вам будет предложено <strong>5 случайных вопросов</strong> из банка. На каждый вопрос — 4 варианта ответа.</p>
+                    <p class="hint">Правильные ответы хранятся только на сервере и не передаются в браузер до проверки результата.</p>
+                    <button type="button" id="btn-start" class="btn btn-primary">Начать квиз</button>
+                </div>
+            </section>
+
+            <!-- Quiz screen -->
+            <section id="screen-quiz" class="screen">
+                <div class="progress-wrap">
+                    <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+                    <span id="progress-text" class="progress-text">Вопрос 1 из 5</span>
+                </div>
+                <div id="quiz-container" class="card"></div>
+                <div class="nav-buttons">
+                    <button type="button" id="btn-prev" class="btn btn-outline" disabled>Назад</button>
+                    <button type="button" id="btn-next" class="btn btn-primary" disabled>Далее</button>
+                </div>
+            </section>
+
+            <!-- Result screen -->
+            <section id="screen-result" class="screen">
+                <div class="card result-card">
+                    <h2>Результат</h2>
+                    <div id="score-display" class="score-display"></div>
+                    <p id="score-message" class="score-message"></p>
+                    <button type="button" id="btn-restart" class="btn btn-primary">Пройти ещё раз</button>
+                </div>
+            </section>
+
+            <!-- Error -->
+            <section id="screen-error" class="screen">
+                <div class="card">
+                    <h2>Ошибка</h2>
+                    <p id="error-text"></p>
+                    <button type="button" id="btn-retry" class="btn btn-primary">Попробовать снова</button>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
