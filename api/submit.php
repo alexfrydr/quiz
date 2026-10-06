@@ -36,9 +36,10 @@ if (
     exit;
 }
 
-// Ограничение по времени (например, 30 минут)
-if (!empty($_SESSION['quiz_created']) && (time() - (int)$_SESSION['quiz_created']) > 1800) {
-    unset($_SESSION['quiz_correct'], $_SESSION['quiz_token'], $_SESSION['quiz_created']);
+// Ограничение по времени (берём из сессии, по умолчанию 300 сек)
+$timeLimit = !empty($_SESSION['quiz_time_limit']) ? (int)$_SESSION['quiz_time_limit'] : 300;
+if (!empty($_SESSION['quiz_created']) && (time() - (int)$_SESSION['quiz_created']) > $timeLimit) {
+    unset($_SESSION['quiz_correct'], $_SESSION['quiz_token'], $_SESSION['quiz_created'], $_SESSION['quiz_time_limit']);
     http_response_code(403);
     echo json_encode(['error' => 'Время прохождения квиза истекло. Начните заново.']);
     exit;
@@ -64,7 +65,7 @@ foreach ($correctMap as $qId => $correctAnswerId) {
 }
 
 // Одноразовая проверка — сбрасываем сессию квиза
-unset($_SESSION['quiz_correct'], $_SESSION['quiz_token'], $_SESSION['quiz_created']);
+unset($_SESSION['quiz_correct'], $_SESSION['quiz_token'], $_SESSION['quiz_created'], $_SESSION['quiz_time_limit']);
 
 echo json_encode([
     'score' => $score,

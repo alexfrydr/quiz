@@ -127,12 +127,19 @@ body {
     margin-bottom: 20px;
 }
 
+.progress-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    gap: 12px;
+}
+
 .progress-bar {
     height: 6px;
     background: var(--border);
     border-radius: 3px;
     overflow: hidden;
-    margin-bottom: 8px;
 }
 
 .progress-fill {
@@ -146,6 +153,34 @@ body {
 .progress-text {
     font-size: 0.85rem;
     color: var(--muted);
+}
+
+.timer {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--accent);
+    background: #eef2ff;
+    padding: 4px 12px;
+    border-radius: 8px;
+    min-width: 4.2em;
+    text-align: center;
+}
+
+.timer.timer-warn {
+    color: #d97706;
+    background: #fff7ed;
+}
+
+.timer.timer-critical {
+    color: #dc2626;
+    background: #fef2f2;
+    animation: timer-pulse 0.8s ease infinite alternate;
+}
+
+@keyframes timer-pulse {
+    from { opacity: 1; }
+    to { opacity: 0.65; }
 }
 
 /* Question */

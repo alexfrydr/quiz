@@ -19,6 +19,7 @@
                 <div class="card">
                     <h2>Проверка знаний</h2>
                     <p>Вам будет предложено <strong>5 случайных вопросов</strong> из банка. На каждый вопрос — 4 варианта ответа.</p>
+                    <p>На выполнение даётся <strong>5 минут</strong>. После истечения времени ответы отправятся автоматически.</p>
                     <p class="hint">Правильные ответы хранятся только на сервере и не передаются в браузер до проверки результата.</p>
                     <button type="button" id="btn-start" class="btn btn-primary">Начать квиз</button>
                 </div>
@@ -27,8 +28,11 @@
             <!-- Quiz screen -->
             <section id="screen-quiz" class="screen">
                 <div class="progress-wrap">
+                    <div class="progress-top">
+                        <span id="progress-text" class="progress-text">Вопрос 1 из 5</span>
+                        <span id="timer" class="timer" aria-live="polite">05:00</span>
+                    </div>
                     <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
-                    <span id="progress-text" class="progress-text">Вопрос 1 из 5</span>
                 </div>
                 <div id="quiz-container" class="card"></div>
                 <div class="nav-buttons">

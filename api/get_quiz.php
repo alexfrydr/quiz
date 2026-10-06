@@ -71,11 +71,15 @@ foreach ($selectedKeys as $key) {
 }
 
 // Сохраняем правильные ответы только на сервере
+$timeLimitSec = 300; // 5 минут на весь квиз
+
 $_SESSION['quiz_correct'] = $correctMap;
 $_SESSION['quiz_token'] = bin2hex(random_bytes(16));
 $_SESSION['quiz_created'] = time();
+$_SESSION['quiz_time_limit'] = $timeLimitSec;
 
 echo json_encode([
     'token' => $_SESSION['quiz_token'],
+    'time_limit' => $timeLimitSec,
     'questions' => $quizForClient,
 ], JSON_UNESCAPED_UNICODE);

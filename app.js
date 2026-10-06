@@ -14,6 +14,10 @@
     let currentIndex = 0;
     /** @type {Record<string, string>} questionId -> answerId */
     let userAnswers = {};
+    let timeLimitSec = 300;
+    let remainingSec = 300;
+    let timerId = null;
+    let submitting = false;
 
     const screens = {
         start: document.getElementById('screen-start'),
@@ -26,6 +30,7 @@
         quizContainer: document.getElementById('quiz-container'),
         progressFill: document.getElementById('progress-fill'),
         progressText: document.getElementById('progress-text'),
+        timer: document.getElementById('timer'),
         btnStart: document.getElementById('btn-start'),
         btnPrev: document.getElementById('btn-prev'),
         btnNext: document.getElementById('btn-next'),
@@ -42,13 +47,59 @@
     }
 
     function showError(message) {
+        stopTimer();
         el.errorText.textContent = message;
         showScreen('error');
+    }
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+    }
+
+    function updateTimerDisplay() {
+        if (!el.timer) return;
+        el.timer.textContent = formatTime(remainingSec);
+        el.timer.classList.toggle('timer-warn', remainingSec <= 60 && remainingSec > 15);
+        el.timer.classList.toggle('timer-critical', remainingSec <= 15);
+    }
+
+    function stopTimer() {
+        if (timerId !== null) {
+            clearInterval(timerId);
+            timerId = null;
+        }
+    }
+
+    function startTimer() {
+        stopTimer();
+        remainingSec = timeLimitSec;
+        updateTimerDisplay();
+
+        timerId = setInterval(function () {
+            remainingSec -= 1;
+            if (remainingSec <= 0) {
+                remainingSec = 0;
+                updateTimerDisplay();
+                stopTimer();
+                onTimeUp();
+                return;
+            }
+            updateTimerDisplay();
+        }, 1000);
+    }
+
+    function onTimeUp() {
+        if (submitting) return;
+        submitQuiz(true);
     }
 
     async function startQuiz() {
         el.btnStart.disabled = true;
         el.btnStart.textContent = 'Загрузка…';
+        stopTimer();
+        submitting = false;
 
         try {
             const res = await fetch(API_GET, {
@@ -69,11 +120,13 @@
 
             token = data.token;
             questions = data.questions;
+            timeLimitSec = typeof data.time_limit === 'number' ? data.time_limit : 300;
             currentIndex = 0;
             userAnswers = {};
 
             showScreen('quiz');
             renderQuestion();
+            startTimer();
         } catch (err) {
             showError(err.message || 'Ошибка сети');
         } finally {
@@ -170,9 +223,14 @@
         await submitQuiz();
     }
 
-    async function submitQuiz() {
+    async function submitQuiz(fromTimeout) {
+        if (submitting) return;
+        submitting = true;
+        stopTimer();
+
         el.btnNext.disabled = true;
-        el.btnNext.textContent = 'Проверка…';
+        el.btnPrev.disabled = true;
+        el.btnNext.textContent = fromTimeout ? 'Время вышло…' : 'Проверка…';
 
         try {
             const res = await fetch(API_SUBMIT, {
@@ -194,34 +252,42 @@
                 throw new Error(data.error || 'Ошибка при проверке');
             }
 
-            showResult(data.score, data.total);
+            showResult(data.score, data.total, fromTimeout);
         } catch (err) {
+            submitting = false;
             showError(err.message || 'Ошибка сети');
         }
     }
 
-    function showResult(score, total) {
+    function showResult(score, total, fromTimeout) {
+        stopTimer();
         el.scoreDisplay.innerHTML =
             escapeHtml(String(score)) + ' <span class="total">из ' + escapeHtml(String(total)) + '</span>';
 
         let msg;
-        if (score === total) {
-            msg = 'Отличный результат! Все ответы верные.';
-        } else if (score >= Math.ceil(total * 0.6)) {
-            msg = 'Хороший результат. Есть куда расти.';
-        } else if (score > 0) {
-            msg = 'Стоит повторить материал по веб-программированию.';
+        if (fromTimeout) {
+            msg = 'Время истекло. Учтены только отмеченные ответы. ';
         } else {
-            msg = 'Не расстраивайтесь — попробуйте ещё раз.';
+            msg = '';
+        }
+
+        if (score === total) {
+            msg += 'Отличный результат! Все ответы верные.';
+        } else if (score >= Math.ceil(total * 0.6)) {
+            msg += 'Хороший результат. Есть куда расти.';
+        } else if (score > 0) {
+            msg += 'Стоит повторить материал по веб-программированию.';
+        } else {
+            msg += 'Не расстраивайтесь — попробуйте ещё раз.';
         }
 
         el.scoreMessage.textContent = msg;
         showScreen('result');
 
-        // Сброс клиентского состояния (серверная сессия уже сброшена)
         token = null;
         questions = [];
         userAnswers = {};
+        submitting = false;
     }
 
     function escapeHtml(str) {
